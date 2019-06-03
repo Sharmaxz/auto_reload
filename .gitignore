@@ -98,3 +98,6 @@ ENV/
 # IDEs
 .idea/
 *.iml
+
+# Images
+imgs/*
