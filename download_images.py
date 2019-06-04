@@ -6,7 +6,7 @@ import requests
 
 def download_images():
     img_count, img_reponse_failed = 0, 0
-
+    print('im here')
     with open('processed.json', 'r') as file:
         result = json.loads(file.read())
         for small_big in result['result']:
@@ -35,5 +35,6 @@ def download_images():
                     print(f"Image {path} already was added")
             except:
                 os.remove(path)
+    print("The images was updated!")
 
-download_images()
+#download_images()
