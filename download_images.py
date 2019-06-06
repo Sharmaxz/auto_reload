@@ -6,10 +6,10 @@ import requests
 
 def download_images():
     img_count, img_reponse_failed = 0, 0
-    print('im here')
     with open('processed.json', 'r') as file:
         result = json.loads(file.read())
         for small_big in result['result']:
+            time.sleep(5)
             path = 'imgs/'+small_big['shortcode'] + '.jpg'
             try:
                 if not os.path.exists(path):
