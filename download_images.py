@@ -35,6 +35,7 @@ def download_images():
                     print(f"Image {path} already was added")
             except:
                 os.remove(path)
+
     print("The images was updated!")
 
 #download_images()

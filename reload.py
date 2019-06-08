@@ -11,6 +11,7 @@ url = 'http://small-big-api.herokuapp.com/photo/processed'
 time_url = 'http://just-the-time.appspot.com/'
 time_update = 0
 
+
 def get_json():
     # If someone remove this folder, the project will crash.
     if not os.path.exists('imgs'):
@@ -25,22 +26,26 @@ def get_json():
         file.close()
     print("The processed.json was updated!")
     download_images()
+    reload()
 
 
 def reload():
-
-    # if date.hour == time_update:
-    #     get_json
-
-    #Check if the website is on
-    if str(urlopen(time_url).getcode()) == '201':
+    # Check if the website is on
+    if str(urlopen(time_url).getcode()) == '200':
         # UTC(0), BRT(-3)
         response = urlopen(time_url)
         date = (response.read().strip()).decode('utf-8') + '.0'
         date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f')
-        time = date.date() - timedelta(hours=3) # UTC - BRT
+        date = date - timedelta(hours=3)  # UTC - BRT
     else:
         date = datetime.now()
 
+    print(date)
+    if date.hour == time_update:
+        get_json()
+        print(date)
 
-reload();
+    time.sleep(60 * 20)
+    reload()
+
+reload()
