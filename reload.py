@@ -16,6 +16,11 @@ def get_json():
     # If someone remove this folder, the project will crash.
     if not os.path.exists('imgs'):
         os.mkdir('imgs')
+    if not os.path.exists('imgs/small'):
+        os.mkdir('imgs/small')
+    if not os.path.exists('imgs/big'):
+        os.mkdir('imgs/big')
+
     response = requests.get(url, stream=False)
     print(response)
     result = response.json()
@@ -25,7 +30,9 @@ def get_json():
         file.write(result)
         file.close()
     print("The processed.json was updated!")
+    print("Downloading images")
     download_images()
+    print("Waiting to next update")
     reload()
 
 
@@ -42,10 +49,11 @@ def reload():
 
     print(date)
     if date.hour == time_update:
+        print("Updating")
         get_json()
-        print(date)
 
-    time.sleep(60 * 20)
+    time.sleep(60 * 15)
     reload()
+
 
 reload()
