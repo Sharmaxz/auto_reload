@@ -56,4 +56,4 @@ def reload():
     reload()
 
 
-reload()
+get_json()
