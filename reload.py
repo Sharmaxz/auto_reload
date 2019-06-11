@@ -23,17 +23,20 @@ def get_json():
 
     response = requests.get(url, stream=False)
     print(response)
-    result = response.json()
+    if not response.ok:
+        reload()
+    else:
+        result = response.json()
 
-    with open('processed.json', 'w+') as file:
-        result = json.dumps(result, indent=3)
-        file.write(result)
-        file.close()
-    print("The processed.json was updated!")
-    print("Downloading images")
-    download_images()
-    print("Waiting to next update")
-    reload()
+        with open('processed.json', 'w+') as file:
+            result = json.dumps(result, indent=3)
+            file.write(result)
+            file.close()
+        print("The processed.json was updated!")
+        print("Downloading images")
+        download_images()
+        print("Waiting to next update")
+        reload()
 
 
 def reload():
@@ -56,4 +59,5 @@ def reload():
     reload()
 
 
+print("Starting...")
 get_json()
