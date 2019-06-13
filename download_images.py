@@ -14,7 +14,7 @@ dotenv.load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 size = 150, 150
 url = 'http://small-big-api.herokuapp.com/photo'
-path = f'C:/Users/{getpass.getuser()}/Documents/Hub9/auto_reload/imgs/small/'
+path = f'C:/Users/{getpass.getuser()}/Documents/Hub9/auto_reload/dist/imgs/small/'
 dbx_path = '/nwjs-v0.38.4-win-x64/public/imgs/small/'
 dbx = dropbox.Dropbox('9dXiur3lW-AAAAAAAAAAC2DXsDaGJgscGQbQpz1ZOvKAl8pGxNR4Al3CgeSp96LU') #os.environ.get('DROPBOX_TOKEN', ''))
 
