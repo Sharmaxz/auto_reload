@@ -35,7 +35,6 @@ def download_images():
                 photo = dbx.files_alpha_get_metadata(f"{dbx_path}{shortcode_jpg}")
             except:
                 photo = ''
-            print(photo)
 
             try:
                 if not photo == shortcode_jpg:
