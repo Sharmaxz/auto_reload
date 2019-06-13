@@ -51,7 +51,7 @@ def download_images():
                         print(small_big['shortcode'])
                         img = Image.open(BytesIO(response.content)).convert('RGB')
                         img.thumbnail(size, Image.ANTIALIAS)
-                        img.save(path + shortcode_jpg + '.jpg', "JPEG")
+                        img.save(path + shortcode_jpg, "JPEG")
                         print(f"The {small_big['shortcode']} is uploading")
                         with open(path + shortcode_jpg + '.jpg', 'rb') as f:
                             try:
