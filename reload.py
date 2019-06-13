@@ -18,8 +18,6 @@ def get_json():
         os.mkdir('imgs')
     if not os.path.exists('imgs/small'):
         os.mkdir('imgs/small')
-    if not os.path.exists('imgs/big'):
-        os.mkdir('imgs/big')
 
     response = requests.get(url, stream=False)
     print(response)

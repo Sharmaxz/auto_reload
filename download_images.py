@@ -16,7 +16,7 @@ size = 150, 150
 url = 'http://small-big-api.herokuapp.com/photo'
 path = f'C:/Users/{getpass.getuser()}/Documents/Hub9/auto_reload/imgs/small/'
 dbx_path = '/nwjs-v0.38.4-win-x64/public/imgs/small/'
-dbx = dropbox.Dropbox(os.environ.get('DROPBOX_TOKEN', ''))
+dbx = dropbox.Dropbox('9dXiur3lW-AAAAAAAAAAC2DXsDaGJgscGQbQpz1ZOvKAl8pGxNR4Al3CgeSp96LU') #os.environ.get('DROPBOX_TOKEN', ''))
 
 
 def download_images():
@@ -86,4 +86,4 @@ def download_images():
         except:
             print("WARNING: uploud failed!")
 
-download_images()
+# download_images()
