@@ -16,7 +16,10 @@ size = 150, 150
 url = 'http://small-big-api.herokuapp.com/photo'
 path = f'C:/Users/{getpass.getuser()}/Documents/Hub9/auto_reload/dist/reload/imgs/small/'
 dbx_path = '/nwjs-v0.38.4-win-x64/public/imgs/small/'
-dbx = dropbox.Dropbox('9dXiur3lW-AAAAAAAAAAC2DXsDaGJgscGQbQpz1ZOvKAl8pGxNR4Al3CgeSp96LU') #os.environ.get('DROPBOX_TOKEN', ''))
+# path = f'C:/Users/{getpass.getuser()}/Desktop/Hub9/auto_reload/imgs/small/'
+# dbx_path = '/teste/imgs/small/'
+dbx = dropbox.Dropbox('9dXiur3lW-AAAAAAAAAAC2DXsDaGJgscGQbQpz1ZOvKAl8pGxNR4Al3CgeSp96LU')
+limit = 30000
 
 
 def download_images():
@@ -29,7 +32,8 @@ def download_images():
     with open('processed.json', 'r') as file:
         result = json.loads(file.read())
         for small_big in result['result']:
-
+            if img_count == limit:
+                break
             shortcode_jpg = small_big['shortcode'] + '.jpg'
             try:
                 photo = dbx.files_alpha_get_metadata(f"{dbx_path}{shortcode_jpg}")
@@ -57,6 +61,7 @@ def download_images():
                                 dbx.files_upload(f.read(), f"{dbx_path}{shortcode_jpg}",
                                 mode=WriteMode('overwrite'))
                                 print(path + shortcode_jpg)
+                                f.close()
                                 os.remove(path + shortcode_jpg)
                             except:
                                 print("WARNING: uploud failed!")
@@ -86,4 +91,5 @@ def download_images():
         except:
             print("WARNING: uploud failed!")
 
-# download_images()
+
+download_images()
