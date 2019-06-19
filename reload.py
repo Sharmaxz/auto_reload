@@ -8,6 +8,7 @@ from datetime import timedelta
 from download_images import download_images
 
 url = 'http://small-big-api.herokuapp.com/photo/processed'
+url_hashtag = 'https://small-big-api.herokuapp.com/hashtag/'
 time_url = 'http://just-the-time.appspot.com/'
 time_update = 0
 
@@ -19,18 +20,28 @@ def get_json():
     if not os.path.exists('imgs/small'):
         os.mkdir('imgs/small')
 
+    # processed.json
     response = requests.get(url, stream=False)
+    r = requests.get(url_hashtag, stream=False)
     print(response)
-    if not response.ok:
+    print(r)
+    if not response.ok or not r.ok:
         reload()
     else:
         result = response.json()
-
+        hashtag_result = r.json()
         with open('processed.json', 'w+') as file:
             result = json.dumps(result, indent=3)
             file.write(result)
             file.close()
         print("The processed.json was updated!")
+
+        with open('hashtags.json', 'w+') as file:
+            result = json.dumps(hashtag_result, indent=3)
+            file.write(result)
+            file.close()
+        print("The hashtags.json was updated!")
+
         print("Downloading images")
         download_images()
         print("Waiting to next update")

@@ -27,12 +27,12 @@ def download_images():
         dbx.files_create_folder('/nwjs-v0.38.4-win-x64/public/imgs/small')
         dbx.files_create_folder('/nwjs-v0.38.4-win-x64/public/assets/json')
 
-    img_count, img_reponse_failed = 0, 0
+    img_count, img_downloaded, img_response_failed = 0, 0, 0
 
     with open('processed.json', 'r') as file:
         result = json.loads(file.read())
         for small_big in result['result']:
-            if img_count == limit:
+            if img_count >= limit:
                 break
             shortcode_jpg = small_big['shortcode'] + '.jpg'
             try:
@@ -41,13 +41,14 @@ def download_images():
                 photo = ''
 
             try:
+                img_count += 1
                 if not photo == shortcode_jpg:
-                    img_count += 1
+                    img_downloaded += 1
                     print('------------------------------------------------')
                     response = requests.get(small_big['image_url'], stream=True)
 
                     if not response.ok:
-                        img_reponse_failed += 1
+                        img_response_failed += 1
                         delete = requests.delete(url + '/delete/' + small_big['shortcode'])
                         print(f"The shortcode {small_big['shortcode']} was deleted!")
                     else:
@@ -66,11 +67,11 @@ def download_images():
                             except:
                                 print("WARNING: uploud failed!")
 
-                    img_percent = img_reponse_failed / img_count
+                    img_percent = img_response_failed / img_downloaded
                     print(f'Downloaded images status:\n'
                           f'{"%.2f"%(img_percent)}% failed | '
                           f'{"%.2f"%(100 - img_percent)}% completed | '
-                          f'images total: {img_count}')
+                          f'images total: {img_downloaded}')
                 else:
                     print('------------------------------------------------')
                     print(f"Image {small_big['shortcode']} already was added")
@@ -87,9 +88,16 @@ def download_images():
     with open('processed.json', 'rb') as f:
         try:
             dbx.files_upload(f.read(), f'/nwjs-v0.38.4-win-x64/public/assets/json/{f}',
-            mode=WriteMode('overwrite'))
+                             mode=WriteMode('overwrite'))
+        except:
+            print("WARNING: uploud failed!")
+
+    with open('hashtags.json', 'rb') as f:
+        try:
+            dbx.files_upload(f.read(), f'/nwjs-v0.38.4-win-x64/public/assets/json/{f}',
+                             mode=WriteMode('overwrite'))
         except:
             print("WARNING: uploud failed!")
 
 
-download_images()
+# download_images()
