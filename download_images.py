@@ -16,10 +16,48 @@ size = 150, 150
 url = 'http://small-big-api.herokuapp.com/photo'
 path = f'C:/Users/{getpass.getuser()}/Documents/Hub9/auto_reload/dist/reload/imgs/small/'
 dbx_path = '/nwjs-v0.38.4-win-x64/public/imgs/small/'
+dbx = dropbox.Dropbox('9dXiur3lW-AAAAAAAAAAC2DXsDaGJgscGQbQpz1ZOvKAl8pGxNR4Al3CgeSp96LU')
+url_postmon = 'http://api.postmon.com.br/v1/cep/'
+limit = 30000
 # path = f'C:/Users/{getpass.getuser()}/Desktop/Hub9/auto_reload/imgs/small/'
 # dbx_path = '/teste/imgs/small/'
-dbx = dropbox.Dropbox('9dXiur3lW-AAAAAAAAAAC2DXsDaGJgscGQbQpz1ZOvKAl8pGxNR4Al3CgeSp96LU')
-limit = 30000
+
+
+def average():
+    location = {'no_zip_code': []}
+    with open('processed.json', 'r') as file:
+        result = json.loads(file.read())
+        total = len(result['result'])
+
+        for small_big in result['result']:
+            time.sleep(1)
+            try:
+                response = requests.get(f"https://www.instagram.com/p/{small_big['shortcode']}/?__a=1", stream=False)
+                if not response.ok:
+                    print('delete...')
+                else:
+                    r = response.json()
+                    address = json.loads(r['graphql']['shortcode_media']['location']['address_json'])
+
+                    if address['zip_code']:
+                        if '-' not in address['zip_code']:
+                            address['zip_code'] = f"{address['zip_code'][:5]}-{address['zip_code'][5:9]}"
+
+                        response = requests.get(url_postmon + address['zip_code'], stream=False)
+                        r = response.json()
+
+                        if r['bairro'] in location:
+                            location[f"{r['bairro']}"].append(small_big['shortcode'])
+                        else:
+                            location[f"{r['bairro']}"] = [small_big['shortcode']]
+                    else:
+                        location["no_zip_code"].append(small_big['shortcode'])
+                    print(location)
+            except:
+                print('failed!')
+
+
+# average()
 
 
 def download_images():
@@ -90,14 +128,14 @@ def download_images():
             dbx.files_upload(f.read(), f'/nwjs-v0.38.4-win-x64/public/assets/json/{f}',
                              mode=WriteMode('overwrite'))
         except:
-            print("WARNING: uploud failed!")
+            print("WARNING: processed.json uploud failed!")
 
     with open('hashtags.json', 'rb') as f:
         try:
             dbx.files_upload(f.read(), f'/nwjs-v0.38.4-win-x64/public/assets/json/{f}',
                              mode=WriteMode('overwrite'))
         except:
-            print("WARNING: uploud failed!")
+            print("WARNING: hashtags.json uploud failed!")
 
 
 # download_images()
