@@ -34,7 +34,7 @@ def average():
             try:
                 response = requests.get(f"https://www.instagram.com/p/{small_big['shortcode']}/?__a=1", stream=False)
                 if not response.ok:
-                    print('delete...')
+                    delete = requests.delete(url + '/delete/' + small_big['shortcode'])
                 else:
                     r = response.json()
                     address = json.loads(r['graphql']['shortcode_media']['location']['address_json'])
@@ -52,12 +52,20 @@ def average():
                             location[f"{r['bairro']}"] = [small_big['shortcode']]
                     else:
                         location["no_zip_code"].append(small_big['shortcode'])
+
+                    percent = list(map(lambda l: len(location[l]), location))
+                    percent = sum(percent)
+                    print(percent)
+                    for key in location:
+                        percent_unit = (100 * len(location[key]))/percent
+                        percent_total = (100 * len(location[key]))/total
+                        print(f'{key}: {"%.3f"%(percent_unit)}% percent total: {"%.5f"%(percent_total)}%')
                     print(location)
             except:
                 print('failed!')
 
 
-# average()
+average()
 
 
 def download_images():
