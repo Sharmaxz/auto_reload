@@ -27,43 +27,40 @@ def average():
     location = {'no_zip_code': []}
     with open('processed.json', 'r') as file:
         result = json.loads(file.read())
-        total = len(result['result'])
+        query_total = len(result['result'])
 
         for small_big in result['result']:
-            time.sleep(1)
             try:
-                response = requests.get(f"https://www.instagram.com/p/{small_big['shortcode']}/?__a=1", stream=False)
-                if not response.ok:
-                    delete = requests.delete(url + '/delete/' + small_big['shortcode'])
-                else:
+                address = json.loads(small_big['location']['address_json'])
+
+                if address['zip_code']:
+                    if '-' not in address['zip_code']:
+                        address['zip_code'] = f"{address['zip_code'][:5]}-{address['zip_code'][5:9]}"
+
+                    response = requests.get(url_postmon + address['zip_code'], stream=False)
                     r = response.json()
-                    address = json.loads(r['graphql']['shortcode_media']['location']['address_json'])
 
-                    if address['zip_code']:
-                        if '-' not in address['zip_code']:
-                            address['zip_code'] = f"{address['zip_code'][:5]}-{address['zip_code'][5:9]}"
-
-                        response = requests.get(url_postmon + address['zip_code'], stream=False)
-                        r = response.json()
-
-                        if r['bairro'] in location:
-                            location[f"{r['bairro']}"].append(small_big['shortcode'])
-                        else:
-                            location[f"{r['bairro']}"] = [small_big['shortcode']]
+                    if r['bairro'] in location:
+                        location[f"{r['bairro']}"].append(small_big['shortcode'])
                     else:
-                        location["no_zip_code"].append(small_big['shortcode'])
+                        location[f"{r['bairro']}"] = [small_big['shortcode']]
+                else:
+                    location["no_zip_code"].append(small_big['shortcode'])
 
-                    percent = list(map(lambda l: len(location[l]), location))
-                    percent = sum(percent)
-                    print(percent)
-                    for key in location:
-                        percent_unit = (100 * len(location[key]))/percent
-                        percent_total = (100 * len(location[key]))/total
-                        print(f'{key}: {"%.3f"%(percent_unit)}% percent total: {"%.5f"%(percent_total)}%')
-                    print(location)
+                # percent = sum(list(map(lambda l: len(location[l]), location)))
+                # for key in location:
+                #     percent_unit = (100 * len(location[key]))/percent
+                #     percent_total = (100 * len(location[key]))/total
+                #     print(f'{key}: {"%.2f"%(percent_unit)}% percent total: {"%.3f"%(percent_total)}%')
+                # print(f'Total completed: {"%.3f"%(100 * percent/total)}%')
+
             except:
-                print('failed!')
+                print('Image does not have address_json!')
+        location_total = sum(list(map(lambda l: len(location[l]), location)))
+        average = location_total/query_total
+        result = {}
 
+        print('done!')
 
 average()
 
