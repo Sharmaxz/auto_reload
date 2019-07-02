@@ -5,9 +5,10 @@ from urllib.request import urlopen
 import time
 from datetime import datetime
 from datetime import timedelta
-from download_images import download_images
+from download_images import image_limiter
 
 url = 'http://small-big-api.herokuapp.com/photo/processed'
+url_location = 'http://127.0.0.1:5000/location'
 url_hashtag = 'https://small-big-api.herokuapp.com/hashtag/'
 time_url = 'http://just-the-time.appspot.com/'
 time_update = 0
@@ -21,7 +22,7 @@ def get_json():
         os.mkdir('imgs/small')
 
     # processed.json
-    response = requests.get(url, stream=False)
+    response = requests.get(url_location, stream=False)
     r = requests.get(url_hashtag, stream=False)
     print(response)
     print(r)
@@ -30,11 +31,11 @@ def get_json():
     else:
         result = response.json()
         hashtag_result = r.json()
-        with open('processed.json', 'w+') as file:
+        with open('location.json', 'w+') as file:
             result = json.dumps(result, indent=3)
             file.write(result)
             file.close()
-        print("The processed.json was updated!")
+        print("The location.json was updated!")
 
         with open('hashtags.json', 'w+') as file:
             result = json.dumps(hashtag_result, indent=3)
@@ -43,7 +44,7 @@ def get_json():
         print("The hashtags.json was updated!")
 
         print("Downloading images")
-        download_images()
+        image_limiter()
         print("Waiting to next update")
         reload()
 

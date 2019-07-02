@@ -18,51 +18,42 @@ path = f'C:/Users/{getpass.getuser()}/Documents/Hub9/auto_reload/dist/reload/img
 dbx_path = '/nwjs-v0.38.4-win-x64/public/imgs/small/'
 dbx = dropbox.Dropbox('9dXiur3lW-AAAAAAAAAAC2DXsDaGJgscGQbQpz1ZOvKAl8pGxNR4Al3CgeSp96LU')
 url_postmon = 'http://api.postmon.com.br/v1/cep/'
-limit = 30000
+limit = 2000
 # path = f'C:/Users/{getpass.getuser()}/Desktop/Hub9/auto_reload/imgs/small/'
 # dbx_path = '/teste/imgs/small/'
 
 
-def average():
-    location = {'no_zip_code': []}
-    with open('processed.json', 'r') as file:
+def image_limiter():
+    with open('location.json', 'r') as file:
         result = json.loads(file.read())
-        query_total = len(result['result'])
+        zones_total = len(result) - 1
+        images_total = result[0]['Images total']
 
-        for small_big in result['result']:
-            try:
-                address = json.loads(small_big['location']['address_json'])
+        if images_total > limit:
+            images_total = limit
+        zone_limit = images_total/zones_total
 
-                if address['zip_code']:
-                    if '-' not in address['zip_code']:
-                        address['zip_code'] = f"{address['zip_code'][:5]}-{address['zip_code'][5:9]}"
 
-                    response = requests.get(url_postmon + address['zip_code'], stream=False)
-                    r = response.json()
+        #TODO: percentual
+        images = []
+        image_counter = 0
+        for zone in result[2:]:
+            for z in zone:
+                images.append(zone[z][1:int(zone_limit) + 1])
+                image_counter = image_counter + zone[z][0]['count']
 
-                    if r['bairro'] in location:
-                        location[f"{r['bairro']}"].append(small_big['shortcode'])
-                    else:
-                        location[f"{r['bairro']}"] = [small_big['shortcode']]
-                else:
-                    location["no_zip_code"].append(small_big['shortcode'])
+        total = images_total - image_counter
+        images.append(result[1]['None'][1:int(total) + 1])
 
-                # percent = sum(list(map(lambda l: len(location[l]), location)))
-                # for key in location:
-                #     percent_unit = (100 * len(location[key]))/percent
-                #     percent_total = (100 * len(location[key]))/total
-                #     print(f'{key}: {"%.2f"%(percent_unit)}% percent total: {"%.3f"%(percent_total)}%')
-                # print(f'Total completed: {"%.3f"%(100 * percent/total)}%')
+    # with open('processed1.json', 'w+') as file:
+    #     result = json.dumps(images[0], indent=3)
+    #     file.write(result)
+    #     file.close()
 
-            except:
-                print('Image does not have address_json!')
-        location_total = sum(list(map(lambda l: len(location[l]), location)))
-        average = location_total/query_total
-        result = {}
+    #download_images()
 
-        print('done!')
 
-average()
+image_limiter()
 
 
 def download_images():
@@ -126,7 +117,7 @@ def download_images():
 
         file.close()
 
-    print("The images was updated!")
+    print("The images were updated!")
 
     with open('processed.json', 'rb') as f:
         try:
@@ -143,4 +134,3 @@ def download_images():
             print("WARNING: hashtags.json uploud failed!")
 
 
-# download_images()
