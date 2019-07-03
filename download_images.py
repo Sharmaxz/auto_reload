@@ -1,6 +1,6 @@
 import os
 import dotenv
-import time
+from math import ceil
 import json
 from PIL import Image
 from io import BytesIO
@@ -8,6 +8,7 @@ import requests
 import dropbox
 from dropbox.files import WriteMode
 import getpass
+from idna import unicode
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dotenv.load_dotenv(os.path.join(BASE_DIR, '.env'))
@@ -18,42 +19,9 @@ path = f'C:/Users/{getpass.getuser()}/Documents/Hub9/auto_reload/dist/reload/img
 dbx_path = '/nwjs-v0.38.4-win-x64/public/imgs/small/'
 dbx = dropbox.Dropbox('9dXiur3lW-AAAAAAAAAAC2DXsDaGJgscGQbQpz1ZOvKAl8pGxNR4Al3CgeSp96LU')
 url_postmon = 'http://api.postmon.com.br/v1/cep/'
-limit = 2000
-# path = f'C:/Users/{getpass.getuser()}/Desktop/Hub9/auto_reload/imgs/small/'
-# dbx_path = '/teste/imgs/small/'
-
-
-def image_limiter():
-    with open('location.json', 'r') as file:
-        result = json.loads(file.read())
-        zones_total = len(result) - 1
-        images_total = result[0]['Images total']
-
-        if images_total > limit:
-            images_total = limit
-        zone_limit = images_total/zones_total
-
-
-        #TODO: percentual
-        images = []
-        image_counter = 0
-        for zone in result[2:]:
-            for z in zone:
-                images.append(zone[z][1:int(zone_limit) + 1])
-                image_counter = image_counter + zone[z][0]['count']
-
-        total = images_total - image_counter
-        images.append(result[1]['None'][1:int(total) + 1])
-
-    # with open('processed1.json', 'w+') as file:
-    #     result = json.dumps(images[0], indent=3)
-    #     file.write(result)
-    #     file.close()
-
-    #download_images()
-
-
-image_limiter()
+limit = 500
+#path = f'C:/Users/{getpass.getuser()}/Desktop/Hub9/auto_reload/imgs/small/'
+#dbx_path = '/teste/imgs/small/'
 
 
 def download_images():
@@ -66,8 +34,6 @@ def download_images():
     with open('processed.json', 'r') as file:
         result = json.loads(file.read())
         for small_big in result['result']:
-            if img_count >= limit:
-                break
             shortcode_jpg = small_big['shortcode'] + '.jpg'
             try:
                 photo = dbx.files_alpha_get_metadata(f"{dbx_path}{shortcode_jpg}")
@@ -119,12 +85,13 @@ def download_images():
 
     print("The images were updated!")
 
-    with open('processed.json', 'rb') as f:
+    with open('percentual.json', 'rb') as f:
         try:
             dbx.files_upload(f.read(), f'/nwjs-v0.38.4-win-x64/public/assets/json/{f}',
                              mode=WriteMode('overwrite'))
         except:
-            print("WARNING: processed.json uploud failed!")
+            print("WARNING: percentual.json uploud failed!")
+        f.close()
 
     with open('hashtags.json', 'rb') as f:
         try:
@@ -132,5 +99,43 @@ def download_images():
                              mode=WriteMode('overwrite'))
         except:
             print("WARNING: hashtags.json uploud failed!")
+        f.close()
+
+    with open('processed.json', 'rb') as f:
+        try:
+            dbx.files_upload(f.read(), f'/nwjs-v0.38.4-win-x64/public/assets/json/{f}',
+                             mode=WriteMode('overwrite'))
+        except:
+            print("WARNING: processed.json uploud failed!")
+        f.close()
 
 
+def image_limiter():
+    with open('location.json', 'r') as file:
+        result = json.loads(file.read())
+        images_total = result[0]['Images total']
+        images = []
+        processed = {"pages": "?", "result": []}
+        percentual = {}
+        for zone in result[1:]:
+            for z in zone:
+                per = ((100 * zone[z][0]['count']) / images_total)
+                percentual[z] = f"{'%.2f'%(per)}%"
+
+                zone_limit = ceil(per * limit / 100)
+                processed['result'].append(zone[z][1:zone_limit])
+    processed['result'] = [j for i in processed['result'] for j in i]
+
+    with open('percentual.json', 'w+', encoding='utf8') as file:
+        result = json.dumps(percentual, indent=3, ensure_ascii=False)
+        file.write(unicode(result))
+        file.close()
+
+    with open('processed.json', 'w+', encoding='utf8') as file:
+        result = json.dumps(processed, indent=3)
+        file.write(result)
+        file.close()
+
+    download_images()
+
+image_limiter()
