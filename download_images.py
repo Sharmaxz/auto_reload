@@ -19,8 +19,9 @@ path = f'C:/Users/{getpass.getuser()}/Documents/Hub9/auto_reload/dist/reload/img
 dbx_path = '/nwjs-v0.38.4-win-x64/public/imgs/small/'
 dbx = dropbox.Dropbox('9dXiur3lW-AAAAAAAAAAC2DXsDaGJgscGQbQpz1ZOvKAl8pGxNR4Al3CgeSp96LU')
 url_postmon = 'http://api.postmon.com.br/v1/cep/'
-limit = 500
+limit = 10000
 #path = f'C:/Users/{getpass.getuser()}/Desktop/Hub9/auto_reload/imgs/small/'
+#path = '/home/sharmaxz/Documents/hub9/auto_reload/imgs/small'
 #dbx_path = '/teste/imgs/small/'
 
 
@@ -42,14 +43,14 @@ def download_images():
 
             try:
                 img_count += 1
-                if not photo == shortcode_jpg:
+                if photo == '':
                     img_downloaded += 1
                     print('------------------------------------------------')
                     response = requests.get(small_big['image_url'], stream=True)
 
                     if not response.ok:
                         img_response_failed += 1
-                        delete = requests.delete(url + '/delete/' + small_big['shortcode'])
+                        requests.delete(url + '/delete/' + small_big['shortcode'])
                         print(f"The shortcode {small_big['shortcode']} was deleted!")
                     else:
                         print(small_big['shortcode'])
@@ -60,7 +61,7 @@ def download_images():
                         with open(path + shortcode_jpg, 'rb') as f:
                             try:
                                 dbx.files_upload(f.read(), f"{dbx_path}{shortcode_jpg}",
-                                mode=WriteMode('overwrite'))
+                                                 mode=WriteMode('overwrite'))
                                 print(path + shortcode_jpg)
                                 f.close()
                                 os.remove(path + shortcode_jpg)
@@ -87,7 +88,7 @@ def download_images():
 
     with open('percentual.json', 'rb') as f:
         try:
-            dbx.files_upload(f.read(), f'/nwjs-v0.38.4-win-x64/public/assets/json/{f}',
+            dbx.files_upload(f.read(), f'/nwjs-v0.38.4-win-x64/public/assets/json/{f.name}',
                              mode=WriteMode('overwrite'))
         except:
             print("WARNING: percentual.json uploud failed!")
@@ -95,7 +96,7 @@ def download_images():
 
     with open('hashtags.json', 'rb') as f:
         try:
-            dbx.files_upload(f.read(), f'/nwjs-v0.38.4-win-x64/public/assets/json/{f}',
+            dbx.files_upload(f.read(), f'/nwjs-v0.38.4-win-x64/public/assets/json/{f.name}',
                              mode=WriteMode('overwrite'))
         except:
             print("WARNING: hashtags.json uploud failed!")
@@ -103,7 +104,7 @@ def download_images():
 
     with open('processed.json', 'rb') as f:
         try:
-            dbx.files_upload(f.read(), f'/nwjs-v0.38.4-win-x64/public/assets/json/{f}',
+            dbx.files_upload(f.read(), f'/nwjs-v0.38.4-win-x64/public/assets/json/{f.name}',
                              mode=WriteMode('overwrite'))
         except:
             print("WARNING: processed.json uploud failed!")
@@ -114,7 +115,6 @@ def image_limiter():
     with open('location.json', 'r') as file:
         result = json.loads(file.read())
         images_total = result[0]['Images total']
-        images = []
         processed = {"pages": "?", "result": []}
         percentual = {}
         for zone in result[1:]:
@@ -138,4 +138,3 @@ def image_limiter():
 
     download_images()
 
-image_limiter()
